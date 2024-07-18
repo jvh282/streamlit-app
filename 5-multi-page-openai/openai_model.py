@@ -1,4 +1,4 @@
- # Importing required packages
+# openai_model.py
 import streamlit as st
 import openai
 import uuid
@@ -9,13 +9,11 @@ from dotenv import load_dotenv, find_dotenv
 _ = load_dotenv(find_dotenv())
 from assistant import OPENAI_ASSISTANT
 
-
 def app():
     st.title('OpenAI Model')
 
     # Initialize OpenAI client
     client = OpenAI()
-
 
     # Initialize session state variables
     if "session_id" not in st.session_state:
@@ -30,47 +28,42 @@ def app():
     if "retry_error" not in st.session_state:
         st.session_state.retry_error = 0
 
-
-# Initialize OpenAI assistant
+    # Initialize OpenAI assistant
     if "assistant" not in st.session_state:
         openai.api_key = os.getenv('OPENAI_API_KEY')
         st.session_state.assistant = openai.beta.assistants.retrieve(OPENAI_ASSISTANT)
         st.session_state.thread = client.beta.threads.create(
             metadata={'session_id': st.session_state.session_id}
-     )
+        )
 
-# Display chat messages
-    elif hasattr(st.session_state.run, 'status') and st.session_state.run.status == "completed":
-        st.session_state.messages = client.beta.threads.messages.list(
-            thread_id=st.session_state.thread.id
-     )
-        for message in reversed(st.session_state.messages.data):
-            if message.role in ["user", "assistant"]:
-                with st.chat_message(message.role):
-                    for content_part in message.content:
-                        message_text = content_part.text.value
-                        st.markdown(message_text)
+    # Platform selection
+    platform = st.selectbox(
+        "Select Platform",
+        ["LinkedIn", "Facebook", "Instagram"]
+    )
 
-
-# Vorbereiten des initialen Prompts
+    # Prepare initial prompt based on platform
     if 'persona_data' in st.session_state and 'company_data' in st.session_state:
         persona_data = st.session_state['persona_data']
         company_data = st.session_state['company_data']
 
-    # Konvertieren der Daten in einen lesbaren String
         persona_str = ", ".join([f"{key}: {value}" for key, value in persona_data.items()])
         company_str = ", ".join([f"{key}: {value}" for key, value in company_data.items()])
 
-        initial_prompt = f"Erstelle Werbetext basierend auf der User Persona ({persona_str}) und Unternehmensdaten ({company_str})."
+        if platform == "LinkedIn":
+            initial_prompt = f"Create a professional LinkedIn post based on the User Persona ({persona_str}) and Company Data ({company_str})."
+        elif platform == "Facebook":
+            initial_prompt = f"Create an engaging Facebook post based on the User Persona ({persona_str}) and Company Data ({company_str})."
+        elif platform == "Instagram":
+            initial_prompt = f"Create a visually appealing Instagram post based on the User Persona ({persona_str}) and Company Data ({company_str})."
     else:
-         initial_prompt = "Bitte geben Sie Informationen zur User Persona und zum Unternehmen ein."
+        initial_prompt = "Please provide information on User Persona and Company Data."
 
-# Anzeigen des initialen Prompts
-    st.text_area("Initialer Prompt (kopieren und bei Bedarf bearbeiten):", initial_prompt, height=100)
+    # Display the initial prompt
+    st.text_area("Initial Prompt (copy and edit if needed):", initial_prompt, height=100)
 
-
-# Chat input and message creation with file ID
-    if prompt := st.chat_input("Wie kann ich Ihnen helfen?"):
+    # Chat input and message creation with file ID
+    if prompt := st.chat_input("How can I help you?"):
         with st.chat_message('user'):
             st.write(prompt)
 
@@ -80,7 +73,6 @@ def app():
             "content": prompt
         }
 
-    # Include file ID in the request if available
         if "file_id" in st.session_state:
             message_data["file_ids"] = [st.session_state.file_id]
 
@@ -88,13 +80,13 @@ def app():
 
         st.session_state.run = client.beta.threads.runs.create(
             thread_id=st.session_state.thread.id,
-         assistant_id=st.session_state.assistant.id,
+            assistant_id=st.session_state.assistant.id,
         )
         if st.session_state.retry_error < 3:
             time.sleep(1)
             st.rerun()
 
-# Handle run status
+    # Handle run status
     if hasattr(st.session_state.run, 'status'):
         if st.session_state.run.status == "running":
             placeholder = st.empty()
@@ -116,11 +108,10 @@ def app():
             st.session_state.run = client.beta.threads.runs.retrieve(
                 thread_id=st.session_state.thread.id,
                 run_id=st.session_state.run.id,
-         )
+            )
             if st.session_state.retry_error < 3:
                 time.sleep(3)
                 st.rerun()
-
 
 if __name__ == "__main__":
     app()
