@@ -40,3 +40,4 @@ def app():
 # Dieser Teil ist für Testzwecke, wenn Sie dieses Skript einzeln laufen lassen.
 if __name__ == "__main__":
     app()
+    
