@@ -1,21 +1,24 @@
-# openai_model.py
 import streamlit as st
 import openai
 import uuid
 import time
-from openai import OpenAI
-import os
 from dotenv import load_dotenv, find_dotenv
-_ = load_dotenv(find_dotenv())
-from assistant import OPENAI_ASSISTANT
+import os
+
+# Lade die .env-Datei, um den API-Schlüssel zu setzen
+load_dotenv(find_dotenv())
+
+# Hole den API-Schlüssel aus der Umgebungsvariable
+openai.api_key = os.getenv('OPENAI_API_KEY')
+
+if openai.api_key is None:
+    st.error("API key is missing. Please set the OPENAI_API_KEY environment variable.")
+    st.stop()  # Stoppe die Ausführung, wenn der API-Schlüssel fehlt
 
 def app():
     st.title('OpenAI Model')
 
-    # Initialize OpenAI client
-    client = OpenAI()
-
-    # Initialize session state variables
+    # Initialisiere die Session-Statusvariablen
     if "session_id" not in st.session_state:
         st.session_state.session_id = str(uuid.uuid4())
 
@@ -28,21 +31,25 @@ def app():
     if "retry_error" not in st.session_state:
         st.session_state.retry_error = 0
 
-    # Initialize OpenAI assistant
-    if "assistant" not in st.session_state:
-        openai.api_key = os.getenv('OPENAI_API_KEY')
-        st.session_state.assistant = openai.beta.assistants.retrieve(OPENAI_ASSISTANT)
-        st.session_state.thread = client.beta.threads.create(
-            metadata={'session_id': st.session_state.session_id}
+    # Erstelle ein Thread, falls nicht vorhanden
+    if "thread_id" not in st.session_state:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[]
         )
+        st.session_state.thread_id = response['id']
 
-    # Platform selection
-    platform = st.selectbox(
-        "Select Platform",
-        ["LinkedIn", "Facebook", "Instagram"]
-    )
+    # Anzeigen der Chat-Nachrichten
+    if hasattr(st.session_state.run, 'status') and st.session_state.run.status == "completed":
+        response = openai.ChatCompletion.list_messages(
+            chat_id=st.session_state.thread_id
+        )
+        for message in reversed(response['messages']):
+            if message['role'] in ["user", "assistant"]:
+                with st.chat_message(message['role']):
+                    st.markdown(message['content'])
 
-    # Prepare initial prompt based on platform
+    # Bereite den initialen Prompt vor
     if 'persona_data' in st.session_state and 'company_data' in st.session_state:
         persona_data = st.session_state['persona_data']
         company_data = st.session_state['company_data']
@@ -50,43 +57,32 @@ def app():
         persona_str = ", ".join([f"{key}: {value}" for key, value in persona_data.items()])
         company_str = ", ".join([f"{key}: {value}" for key, value in company_data.items()])
 
-        if platform == "LinkedIn":
-            initial_prompt = f"Create a professional LinkedIn post based on the User Persona ({persona_str}) and Company Data ({company_str})."
-        elif platform == "Facebook":
-            initial_prompt = f"Create an engaging Facebook post based on the User Persona ({persona_str}) and Company Data ({company_str})."
-        elif platform == "Instagram":
-            initial_prompt = f"Create a visually appealing Instagram post based on the User Persona ({persona_str}) and Company Data ({company_str})."
+        initial_prompt = f"Erstelle Werbetext basierend auf der User Persona ({persona_str}) und Unternehmensdaten ({company_str})."
     else:
-        initial_prompt = "Please provide information on User Persona and Company Data."
+        initial_prompt = "Bitte geben Sie Informationen zur User Persona und zum Unternehmen ein."
 
-    # Display the initial prompt
-    st.text_area("Initial Prompt (copy and edit if needed):", initial_prompt, height=100)
+    # Anzeigen des initialen Prompts
+    st.text_area("Initialer Prompt (kopieren und bei Bedarf bearbeiten):", initial_prompt, height=100)
 
-    # Chat input and message creation with file ID
-    if prompt := st.chat_input("How can I help you?"):
+    # Chat-Eingabe und Nachrichten-Erstellung
+    if prompt := st.chat_input("Wie kann ich Ihnen helfen?"):
         with st.chat_message('user'):
             st.write(prompt)
 
-        message_data = {
-            "thread_id": st.session_state.thread.id,
-            "role": "user",
-            "content": prompt
-        }
-
-        if "file_id" in st.session_state:
-            message_data["file_ids"] = [st.session_state.file_id]
-
-        st.session_state.messages = client.beta.threads.messages.create(**message_data)
-
-        st.session_state.run = client.beta.threads.runs.create(
-            thread_id=st.session_state.thread.id,
-            assistant_id=st.session_state.assistant.id,
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "user", "content": prompt}
+            ]
         )
+
+        st.session_state.run = response['id']
+
         if st.session_state.retry_error < 3:
             time.sleep(1)
             st.rerun()
 
-    # Handle run status
+    # Verarbeite den Status der Anfrage
     if hasattr(st.session_state.run, 'status'):
         if st.session_state.run.status == "running":
             placeholder = st.empty()
@@ -105,9 +101,9 @@ def app():
                     st.error("FAILED: The OpenAI API is currently processing too many requests. Please try again later ......")
 
         elif st.session_state.run.status != "completed":
-            st.session_state.run = client.beta.threads.runs.retrieve(
-                thread_id=st.session_state.thread.id,
-                run_id=st.session_state.run.id,
+            st.session_state.run = openai.ChatCompletion.retrieve(
+                chat_id=st.session_state.thread_id,
+                run_id=st.session_state.run
             )
             if st.session_state.retry_error < 3:
                 time.sleep(3)
