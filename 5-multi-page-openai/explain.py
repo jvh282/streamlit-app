@@ -1,7 +1,7 @@
 # explain.py
 import streamlit as st
 
-def main():
+def app():
     st.title("Dein Social Media Beitragstexter")
 
     # Erklärtext
