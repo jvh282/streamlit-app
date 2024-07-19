@@ -12,7 +12,7 @@ def app():
 
         # Informationen zu USPs und Zielen
         usps = st.text_area("USPs (Unique Selling Points)")
-        ziele = st.text_area("Zielsetzungen der Kampagne")
+        ziele = st.text_area("Zielsetzungen des Posts")
 
         # Informationen zur Markenpersönlichkeit
         markenpersoenlichkeit = st.text_area("Markenpersönlichkeit und -werte")
