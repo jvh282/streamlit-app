@@ -20,6 +20,9 @@ def app():
         # Informationen zu Hauptzielgruppen
         hauptzielgruppen = st.text_area("Hauptzielgruppen des Unternehmens")
 
+        #Plattformauswahl
+        plattform = st.selectbox("Plattform",["LinkedIn","Instagram", "Facebook"])
+
         # Knopf zum Absenden des Formulars
         submit_button = st.form_submit_button("Unternehmensdaten speichern")
 
@@ -32,7 +35,9 @@ def app():
                 "usps": usps,
                 "ziele": ziele,
                 "markenpersoenlichkeit": markenpersoenlichkeit,
-                "hauptzielgruppen": hauptzielgruppen
+                "hauptzielgruppen": hauptzielgruppen,
+                "plattform": plattform
+
             }
 
             st.success("Unternehmensdaten erfolgreich gespeichert!")
@@ -40,4 +45,3 @@ def app():
 # Dieser Teil ist für Testzwecke, wenn Sie dieses Skript einzeln laufen lassen.
 if __name__ == "__main__":
     app()
-    
