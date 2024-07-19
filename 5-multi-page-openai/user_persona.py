@@ -17,7 +17,7 @@ def app():
         # Verhaltensdaten
         nutzung_sozialer_medien = st.text_area("Nutzungsverhalten Sozialer Medien")
         markenpraferenzen = st.text_area("Markenpräferenzen")
-        markenloyalitaet= st.slider("Ausprägung","niedrig", "hoch", "mittel")
+        markenloyalitaet= st.text_input ("Markenloyalität")
 
         # Knopf zum Absenden des Formulars
         submit_button = st.form_submit_button("User Persona erstellen")
