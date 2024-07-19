@@ -5,6 +5,19 @@ import openai
 import os
 import uuid
 from dotenv import load_dotenv
+from openai import OpenAI
+
+client = OpenAI(api_key='dein-api-schluessel')
+
+response = client.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "How do I migrate my code?"}
+    ]
+)
+print(response.choices[0].message.content)
+
 
 # Lade die Umgebungsvariablen aus der .env-Datei
 load_dotenv()
