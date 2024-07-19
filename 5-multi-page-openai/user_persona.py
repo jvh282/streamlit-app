@@ -15,6 +15,8 @@ def app():
         # Psychografische Daten
         interessen = st.text_area("Interessen und Hobbys")
         werte = st.text_area("Werte und Einstellungen")
+        beruf= st.text_area("Beruf")
+        
 
         # Verhaltensdaten
         nutzung_sozialer_medien = st.text_area("Nutzungsverhalten Sozialer Medien")
