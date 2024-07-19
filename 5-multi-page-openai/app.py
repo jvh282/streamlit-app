@@ -5,16 +5,6 @@ import company_info
 import openai_model
 import data
 import explain
-import openai
-
-response = openai.ChatCompletion.create(
-    model="gpt-3.5-turbo",
-    messages=[
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "How do I migrate my code?"}
-    ]
-)
-print(response['choices'][0]['message']['content'])
 
 
 PAGES = {
