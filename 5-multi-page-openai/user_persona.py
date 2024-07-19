@@ -35,7 +35,6 @@ def app():
                 "geschlecht": geschlecht,
                 "interessen": interessen,
                 "werte": werte,
-                "einkaufsgewohnheiten": einkaufsgewohnheiten,
                 "nutzung_sozialer_medien": nutzung_sozialer_medien,
                 "markenpraferenzen": markenpraferenzen,
                 "markenloyalitaet": markenloyalitaet,
