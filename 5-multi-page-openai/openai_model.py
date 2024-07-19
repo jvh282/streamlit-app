@@ -1,24 +1,19 @@
 import streamlit as st
 import openai
-import uuid
-import time
-from dotenv import load_dotenv, find_dotenv
 import os
+from dotenv import load_dotenv, find_dotenv
 
-# Lade die .env-Datei, um den API-Schlüssel zu setzen
-load_dotenv(find_dotenv())
+# Lade Umgebungsvariablen aus der .env-Datei
+load_dotenv()
 
-# Hole den API-Schlüssel aus der Umgebungsvariable
-openai.api_key = os.getenv('OPENAI_API_KEY')
-
-if openai.api_key is None:
-    st.error("API key is missing. Please set the OPENAI_API_KEY environment variable.")
-    st.stop()  # Stoppe die Ausführung, wenn der API-Schlüssel fehlt
 
 def app():
     st.title('OpenAI Model')
 
-    # Initialisiere die Session-Statusvariablen
+    # Setze den OpenAI API-Schlüssel
+    openai.api_key = os.getenv('OPENAI_API_KEY')
+
+    # Initialisiere Session-Variablen
     if "session_id" not in st.session_state:
         st.session_state.session_id = str(uuid.uuid4())
 
@@ -31,25 +26,7 @@ def app():
     if "retry_error" not in st.session_state:
         st.session_state.retry_error = 0
 
-    # Erstelle ein Thread, falls nicht vorhanden
-    if "thread_id" not in st.session_state:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[]
-        )
-        st.session_state.thread_id = response['id']
-
-    # Anzeigen der Chat-Nachrichten
-    if hasattr(st.session_state.run, 'status') and st.session_state.run.status == "completed":
-        response = openai.ChatCompletion.list_messages(
-            chat_id=st.session_state.thread_id
-        )
-        for message in reversed(response['messages']):
-            if message['role'] in ["user", "assistant"]:
-                with st.chat_message(message['role']):
-                    st.markdown(message['content'])
-
-    # Bereite den initialen Prompt vor
+    # Vorbereiten des initialen Prompts
     if 'persona_data' in st.session_state and 'company_data' in st.session_state:
         persona_data = st.session_state['persona_data']
         company_data = st.session_state['company_data']
@@ -57,32 +34,34 @@ def app():
         persona_str = ", ".join([f"{key}: {value}" for key, value in persona_data.items()])
         company_str = ", ".join([f"{key}: {value}" for key, value in company_data.items()])
 
-        initial_prompt = f"Erstelle Werbetext basierend auf der User Persona ({persona_str}) und Unternehmensdaten ({company_str})."
+        initial_prompt = f"Create marketing text based on the User Persona ({persona_str}) and company data ({company_str})."
     else:
-        initial_prompt = "Bitte geben Sie Informationen zur User Persona und zum Unternehmen ein."
+        initial_prompt = "Please provide User Persona and company information."
 
-    # Anzeigen des initialen Prompts
-    st.text_area("Initialer Prompt (kopieren und bei Bedarf bearbeiten):", initial_prompt, height=100)
+    st.text_area("Initial Prompt (copy and edit if needed):", initial_prompt, height=100)
 
-    # Chat-Eingabe und Nachrichten-Erstellung
-    if prompt := st.chat_input("Wie kann ich Ihnen helfen?"):
+    # Chat input and message creation
+    if prompt := st.chat_input("How can I assist you?"):
         with st.chat_message('user'):
             st.write(prompt)
 
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "user", "content": prompt}
-            ]
-        )
+        # API-Anfrage an OpenAI
+        try:
+            response = openai.Completion.create(
+                model="text-davinci-003",  # Beispiel-Modell
+                prompt=prompt,
+                max_tokens=150
+            )
 
-        st.session_state.run = response['id']
+            message = response.choices[0].text.strip()
+            st.session_state.messages.append({"role": "assistant", "content": message})
 
-        if st.session_state.retry_error < 3:
-            time.sleep(1)
-            st.rerun()
+            with st.chat_message('assistant'):
+                st.write(message)
+        except Exception as e:
+            st.error(f"Error: {e}")
 
-    # Verarbeite den Status der Anfrage
+    # Handle run status
     if hasattr(st.session_state.run, 'status'):
         if st.session_state.run.status == "running":
             placeholder = st.empty()
@@ -101,9 +80,9 @@ def app():
                     st.error("FAILED: The OpenAI API is currently processing too many requests. Please try again later ......")
 
         elif st.session_state.run.status != "completed":
-            st.session_state.run = openai.ChatCompletion.retrieve(
-                chat_id=st.session_state.thread_id,
-                run_id=st.session_state.run
+            st.session_state.run = client.beta.threads.runs.retrieve(
+                thread_id=st.session_state.thread.id,
+                run_id=st.session_state.run.id,
             )
             if st.session_state.retry_error < 3:
                 time.sleep(3)

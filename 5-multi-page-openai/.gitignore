@@ -4,5 +4,4 @@
 .env
 code/.env
 */.env
-# .gitignore
-5-multi-page-openai/assistant.py
+
