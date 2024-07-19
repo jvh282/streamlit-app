@@ -64,7 +64,7 @@ def app():
 
         try:
             response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo-0125",  # Beispiel-Modell, stelle sicher, dass dies das richtige Modell ist
+                model="gpt-3.5-turbo-1106",  # Beispiel-Modell, stelle sicher, dass dies das richtige Modell ist
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=150
             )
