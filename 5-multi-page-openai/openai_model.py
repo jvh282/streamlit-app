@@ -16,7 +16,6 @@ def app():
     st.title('OpenAI Model')
 
     # Initialisiere OpenAI-Client
-    # (Es kann auch sinnvoll sein, dies nur zu machen, wenn es nicht bereits initialisiert ist)
     
     # Initialisiere Sitzungsglobalvariablen
     if "session_id" not in st.session_state:
@@ -51,14 +50,14 @@ def app():
         persona_str = ", ".join([f"{key}: {value}" for key, value in persona_data.items()])
         company_str = ", ".join([f"{key}: {value}" for key, value in company_data.items()])
 
-        initial_prompt = f"Create marketing text based on the User Persona ({persona_str}) and company data ({company_str})."
+        initial_prompt = f"Erstelle einen Ansprechenden Beitragstext basierend auf der beispielhafetn Persona({persona_str}) und der Unternehmensinformationen ({company_str})."
     else:
-        initial_prompt = "Please provide User Persona and company information."
+        initial_prompt = "Bitte stellen Sie Persona- und Unternhemendaten zur Verfügung."
 
-    st.text_area("Initial Prompt (copy and edit if needed):", initial_prompt, height=100)
+    st.text_area("Dein Initialer Prompt. Diesen kannst du ganz einfach kopieren und bei bedarf bearbeiten:", initial_prompt, height=100)
 
     # Chat-Eingabe und Nachrichten-Erstellung
-    if prompt := st.chat_input("How can I assist you?"):
+    if prompt := st.chat_input("Wie kann ich dir helfen?"):
         with st.chat_message('user'):
             st.write(prompt)
 

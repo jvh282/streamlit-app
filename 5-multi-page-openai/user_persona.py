@@ -8,7 +8,9 @@ def app():
     with st.form(key='user_persona_form'):
         name = st.text_input("Name der Persona")
         alter = st.slider("Alter", 18, 100, 30)  # Min, Max, Default
-        geschlecht = st.selectbox("Geschlecht", ["Männlich", "Weiblich", "Andere"])
+        geschlecht = st.selectbox("Geschlecht", ["Männlich", "Weiblich", "Divers", "Keine Angabe"])
+        ansprache = st.selectbox("Ansprache", ["Persönlich", "Allgemein"])
+        anrede = st.selectbox("Anrede",["Duzen", "Siezen"])
 
         # Psychografische Daten
         interessen = st.text_area("Interessen und Hobbys")
@@ -34,7 +36,9 @@ def app():
                 "einkaufsgewohnheiten": einkaufsgewohnheiten,
                 "nutzung_sozialer_medien": nutzung_sozialer_medien,
                 "markenpraferenzen": markenpraferenzen,
-                "markenloyalitaet": markenloyalitaet
+                "markenloyalitaet": markenloyalitaet,
+                "ansprache": ansprache,
+                "anrede": anrede
             }
 
             st.success("User Persona erfolgreich erstellt!")
