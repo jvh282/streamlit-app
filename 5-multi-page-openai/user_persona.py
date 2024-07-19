@@ -15,9 +15,9 @@ def app():
         werte = st.text_area("Werte und Einstellungen")
 
         # Verhaltensdaten
-        einkaufsgewohnheiten = st.text_area("Einkaufsgewohnheiten")
-        nutzung_sozialer_medien = st.text_area("Nutzung Sozialer Medien")
+        nutzung_sozialer_medien = st.text_area("Nutzungsverhalten Sozialer Medien")
         markenpraferenzen = st.text_area("Markenpräferenzen")
+        markenloyalitaet= st.slider("Ausprägung","niedrig", "hoch", "mittel")
 
         # Knopf zum Absenden des Formulars
         submit_button = st.form_submit_button("User Persona erstellen")
@@ -32,7 +32,8 @@ def app():
                 "werte": werte,
                 "einkaufsgewohnheiten": einkaufsgewohnheiten,
                 "nutzung_sozialer_medien": nutzung_sozialer_medien,
-                "markenpraferenzen": markenpraferenzen
+                "markenpraferenzen": markenpraferenzen,
+                "markenloyalitaet": markenloyalitaet
             }
 
             st.success("User Persona erfolgreich erstellt!")
