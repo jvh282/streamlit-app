@@ -1,0 +1,11 @@
+# ignore environment files
+.env
+code/.env
+*/.env
+
+# ignore macOS folder attribute files
+.DS_Store
+*/.DS_Store
+
+benutzer_kurs.py
+.streamlit/secrets.toml
