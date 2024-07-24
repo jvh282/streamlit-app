@@ -51,7 +51,7 @@ def app():
         persona_str = ", ".join([f"{key}: {value}" for key, value in persona_data.items()])
         company_str = ", ".join([f"{key}: {value}" for key, value in company_data.items()])
 
-        initial_prompt = f"Erstelle einen Ansprechenden Beitragstext basierend auf der beispielhafetn Persona({persona_str}) und der Unternehmensinformationen ({company_str})."
+        initial_prompt = f"Es wird ein neuer Social Media Post erstellt. Erstelle einen Ansprechenden Beitragstext für das Unternehmen ({company_str}). Verwende alle notwendigen Informationen die du brauchst, um dich in die Rolle des Unternehmens hineinzuversetzen. Der Beitragstext verfolgt das Ziel möglichst ansprechend zu lesen zu sein. Daher füge auch, wenn du der Meinung bist, dass es dazu passt, Emojis hinzu, um den Text zu unterstreichen. Die Beiträge sollen möglichst viel Reichweite erzeugen und für Markenbekanntheit sorgen. Bitte adaptiere die Bedürfnisse der Persona ({persona_str}) und erzeuge auf Grundlage dieser Informationen eine Zielgruppe, für die der Beitragstext optimiert werden soll. Achte hierbei vor Allem auf die Tonalität, die für die Zeilgruppe angemessen ist. Achte bei der Beitragslänge darauf, für welche Plattform der Text generiert werden soll und füge am Ende des Textes passende Hashtags ein, die die Reichweite auf der Plattform erweitern. Gern darfst du Schlagwörter, die im Text vorkommen, wenn passend, auch bereits mit Hashtags versehen. "
     else:
         initial_prompt = "Bitte stellen Sie Persona- und Unternhemendaten zur Verfügung."
 
